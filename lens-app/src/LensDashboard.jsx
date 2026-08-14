@@ -21,10 +21,13 @@ const Icon = ({ name, ...props }) => {
 };
 
 /* ============================== Backend API client ============================== */
-// Points at the lens-backend server. Override by setting
-// window.__LENS_API_BASE__ before this bundle loads (e.g. in index.html)
-// if the API isn't on localhost:4000.
-const API_BASE = (typeof window !== 'undefined' && window.__LENS_API_BASE__) || 'http://localhost:4000/api';
+// Points at the lens-backend server. Resolution order:
+// 1. VITE_API_BASE env var, set at build time (e.g. in Vercel project settings)
+// 2. window.__LENS_API_BASE__, settable at runtime (e.g. in index.html)
+// 3. localhost:4000, for local dev against a locally running backend
+const API_BASE = import.meta.env.VITE_API_BASE
+  || (typeof window !== 'undefined' && window.__LENS_API_BASE__)
+  || 'http://localhost:4000/api';
 // Google OAuth Web Client ID (Identity Services / ID-token flow — no client secret needed).
 // Override via window.__LENS_GOOGLE_CLIENT_ID__ if you need a different one per environment.
 const GOOGLE_CLIENT_ID = (typeof window !== 'undefined' && window.__LENS_GOOGLE_CLIENT_ID__)
