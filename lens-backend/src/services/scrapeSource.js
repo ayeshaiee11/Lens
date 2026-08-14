@@ -4,7 +4,10 @@ const pdfParse = require('pdf-parse');
 
 const MAX_CHARS = 12000;
 const FETCH_TIMEOUT_MS = 10000;
-const MAX_PDF_BYTES = 15 * 1024 * 1024; // keep in sync with the multer limit in routes/sources.js
+// Kept in sync with the multer limit in routes/sources.js. Lowered from the
+// original 15MB to fit under Vercel's hard 4.5MB request body cap, which
+// cannot be raised by any configuration on Vercel Serverless Functions.
+const MAX_PDF_BYTES = 4 * 1024 * 1024;
 
 function truncate(text) {
   const clean = (text || '').replace(/\s+/g, ' ').trim();
@@ -59,7 +62,7 @@ async function scrapeYoutube(url) {
  */
 async function scrapePdfBuffer(buffer) {
   if (!buffer || !buffer.length) throw new Error('No PDF file data received.');
-  if (buffer.length > MAX_PDF_BYTES) throw new Error('PDF is too large (15MB max).');
+  if (buffer.length > MAX_PDF_BYTES) throw new Error('PDF is too large (4MB max).');
   const parsed = await pdfParse(buffer);
   const text = truncate(parsed.text);
   if (!text) throw new Error('Could not extract any text from this PDF (it may be scanned/image-only).');

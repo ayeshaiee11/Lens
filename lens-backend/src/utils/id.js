@@ -1,12 +1,15 @@
-let counter = 1;
+const crypto = require('crypto');
 
 /**
- * Generates the same style of id the frontend already uses
- * (e.g. "inv_lz3f9a_1"), so records created here slot in
- * seamlessly with anything the client generated optimistically.
+ * Generates a prefixed unique id, e.g. "inv_3f9a2b7c1e4d4a1b".
+ *
+ * Previously used an in-memory counter + Date.now() — fine for a
+ * long-lived process, but serverless functions cold-start constantly and
+ * that counter resets to 1 on every cold start. crypto.randomUUID() is
+ * built into Node (no dependency) and has no process-memory assumptions.
  */
 function uid(prefix = 'id') {
-  return `${prefix}_${Date.now().toString(36)}_${(counter++).toString(36)}`;
+  return `${prefix}_${crypto.randomUUID().replace(/-/g, '')}`;
 }
 
 module.exports = { uid };
